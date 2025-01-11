@@ -31,40 +31,12 @@ function clean() {
     echo "Cleanup completed!"
 }
 
-function lint() {
-    echo "Running linting with flake8..."
-    flake8 src --max-line-length=88
-    FL_STATUS=$?
-
-    if [ $FL_STATUS -eq 0 ]; then
-        echo "Linting passed successfully! No issues found in the code."
-    else
-        echo "Linting failed with exit code $FL_STATUS. Please fix the issues above." >&2
-        exit $FL_STATUS
-    fi
-}
-
-function test() {
-    echo "Running tests with pytest..."
-    pytest tests --cov=src
-    PYTEST_STATUS=$?
-
-    if [ $PYTEST_STATUS -eq 0 ]; then
-        echo "All tests passed successfully!"
-    else
-        echo "Some tests failed with exit code $PYTEST_STATUS. Please review the output above." >&2
-        exit $PYTEST_STATUS
-    fi
-}
-
-function format() {
-    echo "Running formatting with black and isort..."
-    black src tests
-    isort src tests
-    echo "Formatting completed!"
-}
-
 function release() {
+    if [[ -z "${GITHUB_TOKEN}" || -z "${GITHUB_REPO}" ]]; then
+        echo "Error: GITHUB_TOKEN and GITHUB_REPO environment variables must be set."
+        exit 1
+    fi
+
     VERSION_LINE=$(grep '__version__' src/version.py)
     VERSION=$(echo $VERSION_LINE | sed -E "s/__version__ = \"(.*)\"/\1/")
     echo "Current version: $VERSION"
@@ -105,9 +77,11 @@ function release() {
     NEW_VERSION="$MAJOR.$MINOR.$PATCH"
     echo "New version: $NEW_VERSION"
 
+    # Update version in src/version.py
     sed -i '' -e "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" src/version.py
     echo "Updated version in src/version.py"
 
+    # Commit and push changes
     echo "Enter commit message:"
     read commit_message
     git add .
@@ -116,13 +90,10 @@ function release() {
 
     echo "Version $NEW_VERSION released and changes pushed!"
 
+    # Create GitHub release
     echo "Creating GitHub release..."
-    echo "Enter release notes (end with EOF):"
-    release_notes=$(
-        cat <<EOF
-$(</dev/stdin)
-EOF
-    )
+    echo "Enter release notes. Finish input with CTRL+D:"
+    release_notes=$(cat)
 
     curl -X POST \
         -H "Authorization: token ${GITHUB_TOKEN}" \
@@ -131,7 +102,7 @@ EOF
         -d "{
             \"tag_name\": \"$NEW_VERSION\",
             \"name\": \"Release $NEW_VERSION\",
-            \"body\": \"$release_notes\",
+            \"body\": \"$(echo "$release_notes" | sed ':a;N;$!ba;s/\n/\\n/g')\",
             \"draft\": false,
             \"prerelease\": false
         }"
@@ -143,21 +114,6 @@ case "$1" in
 setup)
     setup_venv
     ;;
-lint)
-    setup_venv
-    lint
-    clean
-    ;;
-test)
-    setup_venv
-    test
-    clean
-    ;;
-format)
-    setup_venv
-    format
-    clean
-    ;;
 clean)
     clean
     ;;
@@ -165,7 +121,7 @@ release)
     release
     ;;
 *)
-    echo "Usage: $0 {setup|lint|test|format|clean|release}"
+    echo "Usage: $0 {setup|clean|release}"
     exit 1
     ;;
 esac
