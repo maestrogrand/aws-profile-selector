@@ -31,6 +31,39 @@ function clean() {
     echo "Cleanup completed!"
 }
 
+function lint() {
+    echo "Running linting with flake8..."
+    flake8 src --max-line-length=88
+    FL_STATUS=$?
+
+    if [ $FL_STATUS -eq 0 ]; then
+        echo "Linting passed successfully! No issues found in the code."
+    else
+        echo "Linting failed with exit code $FL_STATUS. Please fix the issues above." >&2
+        exit $FL_STATUS
+    fi
+}
+
+function test() {
+    echo "Running tests with pytest..."
+    pytest tests --cov=src
+    PYTEST_STATUS=$?
+
+    if [ $PYTEST_STATUS -eq 0 ]; then
+        echo "All tests passed successfully!"
+    else
+        echo "Some tests failed with exit code $PYTEST_STATUS. Please review the output above." >&2
+        exit $PYTEST_STATUS
+    fi
+}
+
+function format() {
+    echo "Running formatting with black and isort..."
+    black src tests
+    isort src tests
+    echo "Formatting completed!"
+}
+
 function release() {
     if [[ -z "${GITHUB_TOKEN}" || -z "${GITHUB_REPO}" ]]; then
         echo "Error: GITHUB_TOKEN and GITHUB_REPO environment variables must be set."
@@ -83,7 +116,7 @@ function release() {
 
     # Commit and push changes
     echo "Enter commit message:"
-    read commit_message
+    read -r commit_message
     git add .
     git commit -m "$commit_message"
     git push origin $(git rev-parse --abbrev-ref HEAD)
@@ -92,8 +125,8 @@ function release() {
 
     # Create GitHub release
     echo "Creating GitHub release..."
-    echo "Enter release notes. Finish input with CTRL+D:"
-    release_notes=$(cat)
+    echo "Enter release notes (press Enter, then CTRL+D to finish):"
+    release_notes=$(</dev/stdin)
 
     curl -X POST \
         -H "Authorization: token ${GITHUB_TOKEN}" \
@@ -102,7 +135,7 @@ function release() {
         -d "{
             \"tag_name\": \"$NEW_VERSION\",
             \"name\": \"Release $NEW_VERSION\",
-            \"body\": \"$(echo "$release_notes" | sed ':a;N;$!ba;s/\n/\\n/g')\",
+            \"body\": \"$release_notes\",
             \"draft\": false,
             \"prerelease\": false
         }"
@@ -114,6 +147,21 @@ case "$1" in
 setup)
     setup_venv
     ;;
+lint)
+    setup_venv
+    lint
+    clean
+    ;;
+test)
+    setup_venv
+    test
+    clean
+    ;;
+format)
+    setup_venv
+    format
+    clean
+    ;;
 clean)
     clean
     ;;
@@ -121,7 +169,7 @@ release)
     release
     ;;
 *)
-    echo "Usage: $0 {setup|clean|release}"
+    echo "Usage: $0 {setup|lint|test|format|clean|release}"
     exit 1
     ;;
 esac
