@@ -1,0 +1,33 @@
+name: Tag version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version from src/version.py
+        id: get_version
+        run: echo "::set-output name=version::$(grep '__version__' src/version.py | sed -E "s/.*'(.*)'.*/\1/")"
+
+      - name: Create and push tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git tag ${{ steps.get_version.outputs.version }}
+          git push origin ${{ steps.get_version.outputs.version }}
+
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          body: "Release ${{ steps.get_version.outputs.version }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
