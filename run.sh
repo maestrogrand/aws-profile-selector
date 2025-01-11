@@ -65,6 +65,11 @@ function format() {
 }
 
 function release() {
+    if [[ -z "${GITHUB_TOKEN}" || -z "${GITHUB_REPO}" ]]; then
+        echo "Error: GITHUB_TOKEN and GITHUB_REPO environment variables must be set."
+        exit 1
+    fi
+
     VERSION_LINE=$(grep '__version__' src/version.py)
     VERSION=$(echo $VERSION_LINE | sed -E "s/__version__ = \"(.*)\"/\1/")
     echo "Current version: $VERSION"
@@ -105,24 +110,23 @@ function release() {
     NEW_VERSION="$MAJOR.$MINOR.$PATCH"
     echo "New version: $NEW_VERSION"
 
+    # Update version in src/version.py
     sed -i '' -e "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" src/version.py
     echo "Updated version in src/version.py"
 
+    # Commit and push changes
     echo "Enter commit message:"
-    read commit_message
+    read -r commit_message
     git add .
     git commit -m "$commit_message"
     git push origin $(git rev-parse --abbrev-ref HEAD)
 
     echo "Version $NEW_VERSION released and changes pushed!"
 
+    # Create GitHub release
     echo "Creating GitHub release..."
-    echo "Enter release notes (end with EOF):"
-    release_notes=$(
-        cat <<EOF
-$(</dev/stdin)
-EOF
-    )
+    echo "Enter release notes (press Enter, then CTRL+D to finish):"
+    release_notes=$(</dev/stdin)
 
     curl -X POST \
         -H "Authorization: token ${GITHUB_TOKEN}" \
