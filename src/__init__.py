@@ -11,4 +11,4 @@ Features:
 - Thread-safe operations to handle concurrent access.
 """
 
-__version__ = "0.2.0"
+from .version import __version__  # noqa: F401
