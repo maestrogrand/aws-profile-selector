@@ -10,12 +10,18 @@ CURRENT_AWS_PROFILE_FILE = WORKSPACE_DIR / "current_aws_profile.txt"
 
 ALLOWED_PROFILES = ["default", "dev", "staging", "prod"]
 
+
 class InvalidAWSProfileError(Exception):
     """
     Custom exception for invalid AWS profiles.
     """
+
     def __init__(self, profile, allowed_profiles):
-        super().__init__(f"Profile '{profile}' is not allowed. Allowed profiles: {', '.join(allowed_profiles)}")
+        super().__init__(
+            f"Profile '{profile}' is not allowed. "
+            f"Allowed profiles: {', '.join(allowed_profiles)}"
+        )
+
 
 def set_current_aws_profile(profile: str):
     """
@@ -35,6 +41,7 @@ def set_current_aws_profile(profile: str):
         file.write(profile)
     logger.info(f"Set current AWS profile to: {profile}")
 
+
 def get_current_aws_profile():
     """
     Get the current AWS profile from the text file.
@@ -49,6 +56,7 @@ def get_current_aws_profile():
             return profile
     logger.warning("No current AWS profile is set.")
     return None
+
 
 def list_allowed_profiles():
     """
