@@ -117,8 +117,26 @@ function release() {
     git push origin $(git rev-parse --abbrev-ref HEAD)
 
     echo "Version $NEW_VERSION released and changes pushed!"
-}
 
+    # Create GitHub release
+    echo "Creating GitHub release..."
+    echo "Enter release notes:"
+    read release_notes
+
+    curl -X POST \
+        -H "Authorization: token ${GITHUB_TOKEN}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        https://api.github.com/repos/${GITHUB_REPO}/releases \
+        -d "{
+            \"tag_name\": \"$NEW_VERSION\",
+            \"name\": \"Release $NEW_VERSION\",
+            \"body\": \"$release_notes\",
+            \"draft\": false,
+            \"prerelease\": false
+        }"
+
+    echo "GitHub release created for version $NEW_VERSION!"
+}
 
 case "$1" in
 setup)
