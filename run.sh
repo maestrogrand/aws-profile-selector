@@ -105,11 +105,9 @@ function release() {
     NEW_VERSION="$MAJOR.$MINOR.$PATCH"
     echo "New version: $NEW_VERSION"
 
-    # Update version in src/version.py
     sed -i '' -e "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" src/version.py
     echo "Updated version in src/version.py"
 
-    # Commit and push changes
     echo "Enter commit message:"
     read commit_message
     git add .
@@ -118,10 +116,13 @@ function release() {
 
     echo "Version $NEW_VERSION released and changes pushed!"
 
-    # Create GitHub release
     echo "Creating GitHub release..."
-    echo "Enter release notes:"
-    read release_notes
+    echo "Enter release notes (end with EOF):"
+    release_notes=$(
+        cat <<EOF
+$(</dev/stdin)
+EOF
+    )
 
     curl -X POST \
         -H "Authorization: token ${GITHUB_TOKEN}" \
