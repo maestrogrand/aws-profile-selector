@@ -1,6 +1,6 @@
 # AWS Profile Selector
 
-aws-profile-selector is a utility library designed to simplify AWS profile and workspace management. With this tool, you can easily manage, switch, and retrieve AWS profiles in multi-environment setups. This project is open source and maintained by **MaestroGrand** (also known as Boris K.).
+`aws-profile-selector` is a utility library designed to simplify AWS profile and workspace management. With this tool, you can easily manage, switch, and retrieve AWS profiles in multi-environment setups. This project is open source and maintained by **MaestroGrand** (also known as Boris K.).
 
 ## Features
 
@@ -11,23 +11,58 @@ aws-profile-selector is a utility library designed to simplify AWS profile and w
 
 ## Installation
 
-To install the library, use the following commands:
-
-```bash
-pip install aws-profile-selector
-```
-
-Alternatively, you can clone this repository and install it manually:
+To get started, clone this repository:
 
 ```bash
 git clone https://github.com/maestrogrand/aws-profile-selector.git
 cd aws-profile-selector
-pip install .
 ```
 
-## Usage
+Then, use the provided `run.sh` script to set up the project.
 
-Here are some examples of how to use the library:
+## Usage with `run.sh`
+
+### Setup
+
+Run the following command to set up a virtual environment and install all dependencies:
+
+`./run.sh setup`
+
+### Linting
+
+To lint the project and check for code style issues, run:
+
+`./run.sh lint`
+
+This will use `flake8` with a max line length of 88 to ensure compliance with PEP 8.
+
+### Testing
+
+To run the test suite and generate a coverage report, use:
+
+`./run.sh test`
+
+This will execute tests using `pytest` and generate a coverage report for the `src` directory.
+
+### Formatting
+
+To automatically format the codebase, use:
+
+`./run.sh format`
+
+This will use `black` and `isort` to ensure consistent formatting and sorted imports.
+
+### Cleanup
+
+To clean up the virtual environment and temporary files, run:
+
+`./run.sh clean`
+
+This will remove the `.venv` directory, Python cache files, and other temporary files.
+
+## Library Usage in Code
+
+Here are examples of how to use the `aws-profile-selector` library in your code:
 
 ### Set the Current AWS Profile
 
@@ -69,35 +104,24 @@ You can modify the `ALLOWED_PROFILES` list in the source code to fit your needs.
 
 ## Development
 
-### Setting Up the Project
+### Setting Up
 
-1.  Clone the repository:
+Set up the development environment using `run.sh`:
 
-```bash
-git clone https://github.com/maestrogrand/aws-profile-selector.git
-cd aws-profile-selector
-```
-
-1.  Create a virtual environment and activate it:
-
-```bash
-python3 -m venv venv
-    source venv/bin/activate
-```
-
-1.  Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
+`./run.sh setup`
 
 ### Running Tests
 
-To run the test suite, use the following command:
+Run the tests and generate a coverage report:
 
-```bash
-python -m unittest discover tests
-```
+`./run.sh test`
+
+### Linting and Formatting
+
+To ensure code quality and style consistency, use:
+
+`./run.sh lint
+./run.sh format`
 
 ## Contributing
 
@@ -106,18 +130,14 @@ Contributions are welcome! To contribute:
 1.  Fork the repository.
 2.  Create a new branch for your feature or bug fix:
 
-```bash
-git checkout -b feature-name
-```
+    `git checkout -b feature-name`
 
-1.  Commit your changes and push the branch:
+3.  Commit your changes and push the branch:
 
-```bash
-git commit -m "Add feature"
-    git push origin feature-name
-```
+    `git commit -m "Add feature"
+git push origin feature-name`
 
-1.  Submit a pull request.
+4.  Submit a pull request.
 
 ## License
 
@@ -128,16 +148,3 @@ This project is licensed under the [MIT License](LICENSE). Feel free to use, mod
 - **Author**: MaestroGrand (Boris K.)
 - **GitHub**: [MaestroGrand](https://github.com/maestrogrand/aws-profile-selector.git)
 - **Purpose**: Free and open-source utility for AWS profile and workspace management.
-
----
-
-Enjoy using aws-profile-selector, and feel free to reach out with any questions or suggestions!
-
----
-
-### Customization
-
-- Replace `"https://github.com/maestrogrand/aws-profile-selector"` with the actual GitHub repository URL.
-- Add additional usage examples if needed.
-
-Let me know if you want me to include any other sections or make changes!``
